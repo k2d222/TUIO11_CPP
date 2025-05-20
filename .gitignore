@@ -1,34 +1,26 @@
+.vs/
+Release/
+Debug/
+DebWithRelInfo/
 
+compile_commands.json
 *.mode1v3
-
 *.pbxuser
-
 *.perspectivev3
-
 project.xcworkspace
-
 *.xcuserdatad
-
 build
-
 doc
 
 *.o
-
 *.so
-
 *.a
-
 *.db
-
 *.dylib
-
 *.suo
-
 *.sdf
+*.aps
 
 TuioDump
-
 TuioDemo
-
 SimpleSimulator
