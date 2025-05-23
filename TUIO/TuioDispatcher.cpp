@@ -158,9 +158,7 @@ std::list<TuioObject*> TuioDispatcher::getTuioObjects() {
 
 std::list<TuioCursor*> TuioDispatcher::getTuioCursors() {
 	lockCursorList();
-	std::list<TuioCursor*> listBuffer;
-	listBuffer.insert(listBuffer.end(), cursorList.begin(), cursorList.end());
-	//std::list<TuioCursor*> listBuffer = cursorList;
+	std::list<TuioCursor*> listBuffer = cursorList;
 	unlockCursorList();
 	return listBuffer;
 }

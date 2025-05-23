@@ -77,7 +77,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>Release\$(Platform)\libTUIO\</IntDir>
+    <IntDir>Debug\$(Platform)\libTUIO\</IntDir>
     <OutDir>Debug\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -96,9 +96,8 @@
       <AdditionalIncludeDirectories>..\TUIO;..\oscpack;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;LIB_EXPORT;ENDIANESS=OSC_HOST_LITTLE_ENDIAN;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES
 ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader />
       <WarningLevel>Level2</WarningLevel>
@@ -121,7 +120,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;LIB_EXPORT;ENDIANESS=OSC_HOST_LITTLE_ENDIAN;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES
 ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -145,7 +144,7 @@
       <AdditionalIncludeDirectories>..\TUIO;..\oscpack;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;LIB_EXPORT;OSC_HOST_LITTLE_ENDIAN;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES
 ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <PrecompiledHeader />
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
@@ -168,7 +167,7 @@
       <AdditionalIncludeDirectories>..\TUIO;..\oscpack;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;LIB_EXPORT;OSC_HOST_LITTLE_ENDIAN;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES
 ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>

@@ -18,6 +18,7 @@
 */
 
 #include "WebSockSender.h"
+#include <fcntl.h>
 
 using namespace TUIO;
 
@@ -77,29 +78,25 @@ bool WebSockSender::sendOscPacket (osc::OutboundPacketStream *bundle) {
 }
 
 void WebSockSender::newClient( int tcp_client ) {
-
-	// socket -> file descriptor
-#ifdef WIN32
-	FILE* conn = _fdopen( tcp_client, "r+" );
-#else
-	FILE* conn = fdopen( tcp_client, "r+" );
-#endif
-
 	// websocket challenge-response
 	uint8_t digest[SHA1_HASH_SIZE];
 	char buf[1024] = "...";
-	char key[1024];
+	char key[1024] {};
 
 	// read client handshake challenge
 	while ((buf[0] != 0) && (buf[0] != '\r')) {
-		fgets( buf, sizeof(buf), conn );
-		if (strncmp(buf,"Sec-WebSocket-Key: ",19) == 0) {
-			strncpy(key,buf+19,sizeof(key));
-			key[strlen(buf)-21] = 0;
+		recv(tcp_client, buf, sizeof(buf), 0);
+		printf("recv %s", buf);
+		char* keyIdx = strstr(buf, "Sec-WebSocket-Key: ");
+		if (keyIdx) {
+			keyIdx += strlen("Sec-WebSocket-Key: ");
+			char* end = strchr(keyIdx, '\r');
+			if (!end) end = strchr(keyIdx, '\n');
+			if (end) *end = '\0';
+			strncpy(key, keyIdx, sizeof(key) - 1);
 			break;
 		}
 	}
-
 	strncat(key,"258EAFA5-E914-47DA-95CA-C5AB0DC85B11",sizeof(key)-strlen(key)-1);
 	sha1(digest,(uint8_t*)key,strlen(key));
 
@@ -109,7 +106,7 @@ void WebSockSender::newClient( int tcp_client ) {
 		"Connection: Upgrade\r\n"
 		"Access-Control-Allow-Origin: *\r\n"
 		"Sec-WebSocket-Accept: %s\r\n\r\n",
-		base64( digest, SHA1_HASH_SIZE ).c_str() ); 
+		base64( digest, SHA1_HASH_SIZE ).c_str() );
 
 	send(tcp_client,buf, strlen(buf),0);
 }

@@ -19,7 +19,6 @@
 #ifndef INCLUDED_TUIOPOINT_H
 #define INCLUDED_TUIOPOINT_H
 
-#define _USE_MATH_DEFINES
 #include "TuioTime.h"
 #include "OneEuroFilter.h"
 #include <cmath>
