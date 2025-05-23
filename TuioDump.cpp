@@ -82,37 +82,60 @@ void  TuioDump::refresh(TuioTime frameTime) {
 static void show_help() {
 	std::cout << "Usage: TuioDump -p [port] -t -a [address]" << std::endl;
 	std::cout << "        -p [port] for alternative port number" << std::endl;
-	std::cout << "        -t for TUIO/TCP (dedault is TUIO/UDP)" << std::endl;
+	std::cout << "        -t for TUIO/TCP (default is TUIO/UDP)" << std::endl;
 	std::cout << "        -a [address] for remote TUIO/TCP server" << std::endl;
 	std::cout << "           use 'incoming' for TUIO/TCP socket" << std::endl;
 	std::cout << "        -h show this help" << std::endl;
 }
 
+
+#ifdef WIN32
 static void init(int argc, char** argv) {
-	char c;
-	
-#ifndef WIN32
-	while ((c = getopt(argc, argv, "p:a:th")) != -1) {
-		switch (c) {
-			case 't':
-				_udp = false;
-				break;
-			case 'a':
-				_address = std::string(optarg);
-				break;
-			case 'p':
-				_port = atoi(optarg);
-				break;
-			case 'h':
-				show_help();
-				exit(0);
-			default:
-				show_help();
-				exit(1);
+	for (int i = 1; i < argc; ++i) {
+		if (strcmp(argv[i], "-t") == 0) {
+			_udp = false;
+		}
+		else if (strcmp(argv[i], "-a") == 0 && i + 1 < argc) {
+			_address = std::string(argv[++i]);
+		}
+		else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
+			_port = atoi(argv[++i]);
+		}
+		else if (strcmp(argv[i], "-h") == 0) {
+			show_help();
+			exit(0);
+		}
+		else {
+			show_help();
+			exit(1);
 		}
 	}
-#endif
 }
+#else
+static void init(int argc, char** argv) {
+	char c;
+
+	while ((c = getopt(argc, argv, "p:a:th")) != -1) {
+		switch (c) {
+		case 't':
+			_udp = false;
+			break;
+		case 'a':
+			_address = std::string(optarg);
+			break;
+		case 'p':
+			_port = atoi(optarg);
+			break;
+		case 'h':
+			show_help();
+			exit(0);
+		default:
+			show_help();
+			exit(1);
+		}
+	}
+}
+#endif
 
 int main(int argc, char* argv[])
 {

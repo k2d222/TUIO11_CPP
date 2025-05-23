@@ -40,6 +40,7 @@
 #include <windows.h>
 
 #include <cstring>
+#include <iostream>
 
 
 static LONG initCount_ = 0;
@@ -57,9 +58,9 @@ NetworkInitializer::NetworkInitializer()
 
         // initialize winsock
 	    WSAData wsaData;
-	    int nCode = WSAStartup(MAKEWORD(1, 1), &wsaData);
-	    if( nCode != 0 ){
-	        //std::cout << "WSAStartup() failed with error code " << nCode << "\n";
+	    int nCode = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	    if( nCode != 0 ) {
+	        std::cerr << "WSAStartup() failed with error code " << nCode << "\n";
         }else{
             winsockInitialized_ = true;
         }
@@ -71,7 +72,7 @@ NetworkInitializer::~NetworkInitializer()
 {
     if( InterlockedDecrement( &initCount_ ) == 0 ){
         if( winsockInitialized_ ){
-            WSACleanup();
+          //  WSACleanup();
             winsockInitialized_ = false;
         }
     }

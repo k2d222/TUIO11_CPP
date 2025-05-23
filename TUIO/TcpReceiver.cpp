@@ -17,13 +17,25 @@
 */
 
 #include "TcpReceiver.h"
+#include "ip/NetworkingUtils.h"
 
 using namespace TUIO;
 using namespace osc;
 
 // workaround for connect method name conflict
 int tcp_connect(int socket, const struct sockaddr *address, socklen_t address_len) {
-	return connect(socket, address, address_len);
+	int res = connect(socket, address, address_len);
+
+	if (res) {
+#ifdef WIN32
+		int err = WSAGetLastError();
+		printf("connect() failed: %d\n", err);
+#else
+		perror("connect() failed");
+#endif
+	}
+
+	return res;
 }
 
 #ifdef WIN32
@@ -114,7 +126,6 @@ TcpReceiver::TcpReceiver(int port)
 : tcp_socket	(-1)
 , locked	(false)
 {
-
 	tcp_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (tcp_socket < 0) std::cerr << "could not create TUIO/TCP socket" << std::endl;
 	
@@ -162,35 +173,27 @@ TcpReceiver::TcpReceiver(const char *host, int port)
 : tcp_socket	(-1)
 , locked		(false)
 {
-
 	tcp_socket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (tcp_socket < 0) {
 		std::cerr << "could not create TUIO/TCP socket" << std::endl;
 		return;
 	}
 
-	struct sockaddr_in tcp_server;
-	memset( &tcp_server, 0, sizeof (tcp_server));
-	unsigned long addr = inet_addr(host);
-	if (addr != INADDR_NONE) {
-		memcpy( (char *)&tcp_server.sin_addr, &addr, sizeof(addr));
-	} else {
-		struct hostent *host_info = gethostbyname(host);
-		if (host_info == NULL) std::cerr << "unknown host name: " << host << std::endl;
-		memcpy( (char *)&tcp_server.sin_addr, host_info->h_addr, host_info->h_length );
-	}
-	
+	struct sockaddr_in tcp_server {};
+	unsigned long ip = GetHostByName(host);
+	tcp_server.sin_addr.S_un.S_addr = ip;
 	tcp_server.sin_family = AF_INET;
 	tcp_server.sin_port = htons(port);
 
-	int ret = tcp_connect(tcp_socket,(struct sockaddr*)&tcp_server,sizeof(tcp_server));
-	if (ret<0) {
+	int err = tcp_connect(tcp_socket, (struct sockaddr*)&tcp_server, sizeof(tcp_server));
+	if (err) {
 #ifdef WIN32
 		closesocket(tcp_socket);
 #else
 		close(tcp_socket);
 #endif		
 		std::cerr << "could not connect to TUIO/TCP server at " << host << ":"<< port << std::endl;
+		
 		tcp_socket=-1;
 		return;
 	} else {

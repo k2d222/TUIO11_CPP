@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
 	if (tcp_sender) server->addOscSender(tcp_sender);
 
 	
-	// add an additional TUIO/WEB sender
+	// add an additional TUIO/WEB senders
 	OscSender *web_sender = NULL;
 	try { web_sender = new WebSockSender(8080); }
 	catch (std::exception e) { web_sender = NULL; }

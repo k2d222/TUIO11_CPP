@@ -22,7 +22,7 @@
 #include "OscSender.h"
 
 #ifdef WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #include <io.h>
 #include <stdint.h>
 typedef int socklen_t;

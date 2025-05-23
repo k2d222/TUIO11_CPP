@@ -20,10 +20,12 @@
 #define INCLUDED_TCPRECEIVER_H
 
 #include "OscReceiver.h"
+#include "ip/NetworkingUtils.h"
 #define MAX_TCP_SIZE 65536
 
 #ifdef WIN32
-#include <winsock.h>
+#include <winsock2.h>
+#include <WS2tcpip.h>
 #include <io.h>
 #include <stdint.h>
 typedef int socklen_t;
@@ -98,6 +100,8 @@ namespace TUIO {
 #endif	
 		
 		bool locked;
+
+		NetworkInitializer networkInitializer;
 	};
 };
 #endif /* INCLUDED_TcpReceiver_H */
