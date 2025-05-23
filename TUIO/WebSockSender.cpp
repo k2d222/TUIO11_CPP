@@ -19,16 +19,13 @@
 
 #include "WebSockSender.h"
 #include <fcntl.h>
+#include <algorithm>
 
 using namespace TUIO;
 
 WebSockSender::WebSockSender()
-	:TcpSender( 8080 )
-{
-	local = true;
-	buffer_size = MAX_TCP_SIZE;
-	port_no = 8080;
-}
+	:WebSockSender( 8080 )
+{}
 
 WebSockSender::WebSockSender(int port)
 	:TcpSender( port )
@@ -71,6 +68,7 @@ bool WebSockSender::sendOscPacket (osc::OutboundPacketStream *bundle) {
 		if (len > 125) { hs = 4; header[1] = 126; }
 		memcpy(&data_buffer[0], &header, hs);
 		memcpy(&data_buffer[hs], bundle->Data(), bundle->Size());
+
 		send((*client),data_buffer, hs+bundle->Size(),0);
 	}
 
@@ -80,35 +78,38 @@ bool WebSockSender::sendOscPacket (osc::OutboundPacketStream *bundle) {
 void WebSockSender::newClient( int tcp_client ) {
 	// websocket challenge-response
 	uint8_t digest[SHA1_HASH_SIZE];
-	char buf[1024] = "...";
-	char key[1024] {};
+	std::vector<char> buf(1024);
+	std::string key;
+	const std::string secWsKey = "Sec-WebSocket-Key: ";
+
 
 	// read client handshake challenge
-	while ((buf[0] != 0) && (buf[0] != '\r')) {
-		recv(tcp_client, buf, sizeof(buf), 0);
-		printf("recv %s", buf);
-		char* keyIdx = strstr(buf, "Sec-WebSocket-Key: ");
-		if (keyIdx) {
-			keyIdx += strlen("Sec-WebSocket-Key: ");
-			char* end = strchr(keyIdx, '\r');
-			if (!end) end = strchr(keyIdx, '\n');
-			if (end) *end = '\0';
-			strncpy(key, keyIdx, sizeof(key) - 1);
+	do  {
+		recv(tcp_client, buf.data(), buf.size(), 0);
+		auto keyIdx = std::search(buf.begin(), buf.end(), secWsKey.begin(), secWsKey.end(), [](char a, char b) {
+			return tolower(a) == tolower(b);
+		});
+		if (keyIdx != buf.end()) {
+			std::advance(keyIdx, secWsKey.size());
+			auto endIdx = std::find(keyIdx, buf.end(), '\r');
+			if (endIdx == buf.end()) endIdx = std::find(keyIdx, buf.end(), '\n');
+			key = std::string(keyIdx, endIdx);
 			break;
 		}
-	}
-	strncat(key,"258EAFA5-E914-47DA-95CA-C5AB0DC85B11",sizeof(key)-strlen(key)-1);
-	sha1(digest,(uint8_t*)key,strlen(key));
+	} while (buf[0] != 0 && buf[0] != '\r');
 
-	snprintf(buf, sizeof(buf),
+	key += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	sha1(digest, (uint8_t*)key.data(), key.size());
+	
+	snprintf(buf.data(), buf.size(),
 		"HTTP/1.1 101 Switching Protocols\r\n"
 		"Upgrade: websocket\r\n"
 		"Connection: Upgrade\r\n"
 		"Access-Control-Allow-Origin: *\r\n"
 		"Sec-WebSocket-Accept: %s\r\n\r\n",
-		base64( digest, SHA1_HASH_SIZE ).c_str() );
+		base64(digest, SHA1_HASH_SIZE).c_str());
 
-	send(tcp_client,buf, strlen(buf),0);
+	send(tcp_client, buf.data(), strlen(buf.data()), 0);
 }
 
 
